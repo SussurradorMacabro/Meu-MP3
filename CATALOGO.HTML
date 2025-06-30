@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Jogos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter (para texto geral) e Oswald (para o título) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Fundo escuro para contrastar com as cores dos jogos */
+            color: #e2e8f0; /* Cor do texto padrão */
+        }
+        /* Nova classe para a fonte do título */
+        .header-title-font {
+            font-family: 'Oswald', sans-serif;
+        }
+        .platform-ps4 {
+            color: #3b82f6; /* Azul para PlayStation 4 */
+            font-weight: 700;
+        }
+        .platform-ps5 {
+            color: #cbd5e0; /* Branco para PlayStation 5 */
+            font-weight: 700;
+        }
+        .media-fisica-text { /* Nova classe para o texto "FÍSICA" */
+            color: #3b82f6; /* Azul para Mídia Física */
+            font-weight: 700;
+        }
+        .media-digital-text { /* Nova classe para o texto "DIGITAL" */
+            color: #10b981; /* Verde para Mídia Digital (usando verde para diferenciar do azul de emprestado) */
+            font-weight: 700;
+        }
+        .em-colecao {
+            color: #10b981; /* Verde para Em Coleção */
+            font-weight: 700;
+        }
+        .em-emprestado-thumbnail { /* Novo estilo para EMPRESTADO na thumbnail */
+            color: #ef4444; /* Vermelho para Emprestado */
+            font-weight: 700;
+        }
+        /* Estilo base para checkboxes e inputs para melhor visualização */
+        .form-checkbox {
+            appearance: none;
+            display: inline-block;
+            vertical-align: middle;
+            height: 1.25rem; /* h-5 */
+            width: 1.25rem;  /* w-5 */
+            border: 2px solid #6b7280; /* gray-500 */
+            border-radius: 0.25rem; /* rounded-md */
+            background-color: #4b5563; /* gray-600 */
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .form-checkbox:checked {
+            background-color: #4f46e5; /* indigo-600 */
+            border-color: #4f46e5; /* indigo-600 */
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .form-checkbox.red-checkbox:checked {
+            background-color: #ef4444; /* red-500 */
+            border-color: #ef4444; /* red-500 */
+        }
+        .form-checkbox.green-checkbox:checked { /* Nova cor para checkbox digital */
+            background-color: #10b981; /* green-500 */
+            border-color: #10b981; /* green-500 */
+        }
+        .form-checkbox:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5); /* indigo-500 with opacity */
+        }
+    </style>
+</head>
+<body class="p-6">
+    <header class="text-center mb-10">
+        <h1 class="text-5xl font-extrabold text-white leading-tight header-title-font">
+            Meu <span class="text-indigo-400">Catálogo</span> de Jogos
+        </h1>
+        <p class="text-xl text-gray-400 mt-2">Sua coleção de jogos favoritos em um só lugar.</p>
+    </header>
+
+    <main id="game-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <!-- Os cartões de jogos serão gerados dinamicamente aqui pelo JavaScript -->
+    </main>
+
+    <footer class="text-center mt-10 text-gray-500 text-sm">
+        <p>&copy; 2025 Meu Catálogo de Jogos. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Estrutura do Modal de Detalhes do Jogo -->
+    <div id="gameModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <!-- Aumentado max-w-2xl para max-w-3xl para acomodar a imagem maior -->
+        <div class="bg-gray-900 rounded-lg shadow-2xl p-6 relative max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <!-- Botão para fechar o modal -->
+            <button onclick="closeGameModal()" class="absolute top-3 right-3 text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Imagem da capa do jogo no modal - largura ajustada para ser um pouco maior -->
+                <img id="modalGameCover" src="" alt="Capa do Jogo" class="w-full md:w-2/5 h-auto rounded-lg object-contain">
+                <div class="flex-1">
+                    <!-- Título do jogo no modal -->
+                    <h2 id="modalGameTitle" class="text-4xl font-bold mb-2 text-white"></h2>
+                    <div class="text-gray-400 text-sm mb-4 flex flex-wrap gap-2">
+                        <!-- Informações detalhadas do jogo no modal -->
+                        <p><span class="font-bold">PLATAFORMA(S)</span>: <span id="modalGamePlatforms"></span></p>
+                        <p><span class="font-bold">ANO</span>: <span id="modalGameYear"></span></p>
+                        <p><span class="font-bold">PUBLISHER</span>: <span id="modalGamePublisher"></span></p>
+                        <p><span class="font-bold">GÊNERO</span>: <span id="modalGameGenre"></span></p>
+                    </div>
+                    <!-- Descrição do jogo no modal - visível APENAS no modal -->
+                    <p id="modalGameDescription" class="text-gray-300 mb-4 leading-relaxed text-base"></p>
+
+                    <!-- Seção de Status da Coleção, Mídia e Empréstimo -->
+                    <div class="flex flex-col gap-2 mt-4 text-sm">
+                        <!-- Checkbox "EM COLEÇÃO" -->
+                        <p class="flex items-center gap-2">
+                            <label for="modalInCollectionCheckbox" class="cursor-pointer flex items-center">
+                                <input type="checkbox" id="modalInCollectionCheckbox" class="form-checkbox h-5 w-5 text-indigo-600 rounded-md mr-2">
+                                <span class="em-colecao">EM COLEÇÃO</span>
+                            </label>
+                        </p>
+
+                        <!-- Opções de Empréstimo (movido para aqui) -->
+                        <div id="borrowedOptions" class="hidden flex flex-col gap-2 mt-2">
+                            <label for="modalBorrowedCheckbox" class="cursor-pointer flex items-center">
+                                <input type="checkbox" id="modalBorrowedCheckbox" class="form-checkbox red-checkbox h-5 w-5 rounded-md mr-2">
+                                <span class="text-red-400 font-bold">EMPRESTADO</span>
+                            </label>
+                            <div id="borrowerInputContainer" class="hidden">
+                                <input type="text" id="modalBorrowerNameInput" placeholder="Nome do(a) Tomador(a)" class="mt-1 block w-full rounded-md shadow-sm bg-gray-700 border-gray-600 text-white p-2 mb-2">
+                                <!-- Botão OK adicionado aqui -->
+                                <button id="modalOkButton" onclick="confirmBorrowerNameAndCloseModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">OK</button>
+                            </div>
+                        </div>
+
+                        <!-- Opções de Mídia (Física/Digital) -->
+                        <div class="mt-2">
+                            <p class="font-bold mb-1">MÍDIA:</p>
+                            <div class="flex items-center gap-4">
+                                <label for="modalPhysicalMediaCheckbox" class="cursor-pointer flex items-center">
+                                    <input type="checkbox" id="modalPhysicalMediaCheckbox" class="form-checkbox h-5 w-5 rounded-md mr-2">
+                                    <span class="media-fisica-text">FÍSICA</span>
+                                </label>
+                                <label for="modalDigitalMediaCheckbox" class="cursor-pointer flex items-center">
+                                    <input type="checkbox" id="modalDigitalMediaCheckbox" class="form-checkbox green-checkbox h-5 w-5 rounded-md mr-2">
+                                    <span class="media-digital-text">DIGITAL</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Dados iniciais dos jogos (agora são a única fonte de verdade)
+        let games = [
+            {
+                id: 'cyberpunk-2077',
+                title: 'CYBERPUNK 2077',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}, {name: 'PLAYSTATION 5', color: 'platform-ps5'}],
+                year: 2020,
+                publisher: 'CD PROJEKT RED',
+                genre: 'AÇÃO/RPG/FPS',
+                coverLink: 'https://www.vgdb.com.br/gf/fotos/games/media_43998/cyberpunk-2077---43998.jpg',
+                description: 'Cyberpunk 2077 é um RPG de ação em mundo aberto desenvolvido pela CD Projekt Red, ambientado em Night City, uma metrópole futurista obcecada por poder, glamour e modificações corporais. Você joga como V, um mercenário cibernético personalizável, em busca de um implante único que promete a imortalidade. O jogo oferece múltiplas abordagens para combate, hacking e furtividade, além de escolhas que afetam profundamente a narrativa.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'days-gone',
+                title: 'DAYS GONE',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2019,
+                publisher: 'BEND STUDIO',
+                genre: 'AÇÃO/AVENTURA/MUNDO ABERTO',
+                coverLink: 'https://m.media-amazon.com/images/I/71uZTUnIg-L._UF1000,1000_QL80_.jpg',
+                description: 'A história acompanha Deacon St. John, um ex-soldado e motoqueiro que luta para sobreviver em um mundo devastado por uma pandemia que transformou milhões em criaturas agressivas chamadas Freakers. Assombrado pelo desaparecimento de sua esposa, Deacon percorre as estradas em sua moto, enfrentando inimigos humanos e monstruosos enquanto busca respostas e um propósito.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'south-park-fractured',
+                title: 'SOUTH PARK: FRACRED BUT WHOLE',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2017,
+                publisher: 'UBISOFT',
+                genre: 'RPG POR TURNO',
+                coverLink: 'https://m.media-amazon.com/images/I/718XmlWCUNL.jpg',
+                description: 'Neste RPG de comédia desenvolvido pela Ubisoft, você assume o papel do "Novato", um novo garoto em South Park, agora envolvido em uma guerra entre super-heróis liderada por Eric Cartman, como o "Guaxinim". A trama gira em torno da criação de um império de super-heróis e de um filme próprio, parodiando o universo Marvel/DC com o humor ácido e politicamente incorreto típico da série.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'south-park-stick-of-truth',
+                title: 'SOUTH PARK: THE STICK OF TRUTH',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2014,
+                publisher: 'UBISOFT',
+                genre: 'RPG POR TURNO',
+                coverLink: 'https://www.vgdb.com.br/gf/fotos/games/media_65857/--south-park-the-stick-of-truth-65857.jpg',
+                description: 'The Stick of Truth é um RPG de aventura baseado na famosa série animada South Park. Você joga como o “Novato”, um garoto novo na cidade que se envolve em uma épica batalha de fantasia medieval entre as crianças de South Park, usando espadas, magia e poderes especiais. O jogo mistura combate por turnos, exploração e muita comédia com o humor ácido e satírico característico da série, satirizando temas como cultura pop, política e fantasia.',
+                media: { isPhysical: false, isDigital: true },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'resident-evil-7',
+                title: 'RESIDENT EVIL 7',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2017,
+                publisher: 'CAPCOM',
+                genre: 'SURVIVAL HORROR/FPS/AÇÃO/AVENTURA',
+                coverLink: 'https://cdn.awsli.com.br/800x800/2479/2479795/produto/179813114/resident-evil-7-biohazard-gold-edition-ps4-ps5-midia-digital-4ae2d2cd.jpg',
+                description: 'Resident Evil 7 é um jogo de survival horror em primeira pessoa que leva os jogadores a uma atmosfera assustadora e opressiva. Você controla Ethan Winters, que vai até uma fazenda abandonada em busca de sua esposa desaparecida, enfrentando horrores inimagináveis e uma família mutante e violenta. O jogo enfatiza a exploração, o gerenciamento de recursos escassos e a sobrevivência contra inimigos aterrorizantes, com um foco renovado em suspense e terror psicológico.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'ea-sports-fc-24',
+                title: 'EA SPORTS: FC 24',
+                platforms: [{name: 'PLAYSTATION 5', color: 'platform-ps5'}],
+                year: 2023,
+                publisher: 'EA',
+                genre: 'SIMULADOR/FUTEBOL',
+                coverLink: 'https://hfgamesstore.com.br/wp-content/uploads/2024/05/capa-jogo-ps5-1.jpg',
+                description: 'O jogo destaca-se pela tecnologia HyperMotion V, que captura movimentos reais de jogadores para animações fluídas e autênticas em campo. Além disso, o sistema PlayStyles confere habilidades únicas aos jogadores, refletindo seus estilos reais de jogo. Oferece modos variados, como Modo Carreira, Ultimate Team e VOLTA Football, que permitem desde competições tradicionais até partidas rápidas de futebol de rua, com progressão integrada. Disponível em múltiplas plataformas, o jogo foca em oferecer uma jogabilidade refinada, inteligência artificial aprimorada e modos online para competir com jogadores ao redor do mundo. Ideal para quem ama futebol e quer uma experiência completa, moderna e imersiva no videogame.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'death-stranding',
+                title: 'DEATH STRANDING',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2019,
+                publisher: 'KOJIMA PRODUCTIONS',
+                genre: 'AÇÃO/AVENTURA',
+                coverLink: 'https://www.vgdb.com.br/gf/fotos/games/media_32241/death-stranding-32241.jpg',
+                description: 'Death Stranding é um jogo de ação e aventura em mundo aberto, onde o jogador controla Sam Porter Bridges, um entregador que precisa atravessar territórios perigosos para reconectar cidades isoladas após um evento apocalíptico chamado Death Stranding. O foco está na exploração, superação de obstáculos naturais, entregas de carga e na conexão indireta com outros jogadores por meio de estruturas compartilhadas no mundo.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'assassins-creed-valhalla',
+                title: 'ASSASSIN\'S CREED VALHALLA',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}, {name: 'PLAYSTATION 5', color: 'platform-ps5'}],
+                year: 2020,
+                publisher: 'UBISOFT',
+                genre: 'AÇÃO/AVENTURA/RPG/MUNDO ABERTO',
+                coverLink: 'https://m.media-amazon.com/images/I/819zQmqyDcL._UF1000,1000_QL80_.jpg',
+                description: 'Assassin’s Creed Valhalla é um RPG de ação em mundo aberto onde você assume o papel de Eivor, um guerreiro viking que lidera seu clã na conquista da Inglaterra no século IX. O jogo combina exploração, combate brutal, elementos de furtividade e escolhas narrativas, em uma jornada épica de conquista, alianças e descobertas.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'marvel-avengers',
+                title: 'MARVEL AVENGERS',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2020,
+                publisher: 'SQUARE ENIX',
+                genre: 'AÇÃO/AVENTURA/BEAT\'EM UP/ HACK AND SLASH',
+                coverLink: 'https://m.media-amazon.com/images/I/71%2B0MU0vrML.jpg',
+                description: 'Marvel’s Avengers é um jogo de ação e aventura em terceira pessoa que reúne os heróis icônicos da Marvel para enfrentar uma ameaça global. O jogador controla personagens como Homem de Ferro, Capitã Marvel, Hulk e outros, cada um com habilidades únicas, em uma campanha solo e missões cooperativas multiplayer online. O foco está no combate dinâmico, progressão dos heróis e trabalho em equipe para salvar o mundo.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'assassins-creed-odyssey',
+                title: 'ASSASSIN\'S CREED ODYSSEY',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2018,
+                publisher: 'UBISOFT',
+                genre: 'AÇÃO/AVENTURA/RPG/MUNDO ABERTO',
+                coverLink: 'https://media.gamestop.com/i/gamestop/10163520/Assassins-Creed-Odyssey---PlayStation-4',
+                description: 'Assassin’s Creed Odyssey é um RPG de ação ambientado na Grécia Antiga durante a Guerra do Peloponeso. O jogador escolhe entre dois protagonistas, Kassandra ou Alexios, e embarca em uma jornada épica cheia de batalhas, exploração de vastos ambientes, escolhas morais que impactam a história e combate dinâmico. O jogo combina elementos de furtividade, combate corpo a corpo, e desenvolvimento de personagem, oferecendo uma experiência imersiva de mundo aberto.',
+                media: { isPhysical: true, isDigital: false },
+                                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'detroit-become-human',
+                title: 'DETROIT BECOME HUMAN',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2018,
+                publisher: 'QUANTIC DREAM',
+                genre: 'AVENTURA INTERATIVA/ DRAMA NARRATIVO',
+                coverLink: 'https://acdn-us.mitiendanube.com/stores/353/484/products/base1-2a19079780c2d98a1015873223994284-480-0.jpg',
+                description: 'Detroit: Become Human é um jogo narrativo ambientado em um futuro próximo onde androides, quase indistinguíveis dos humanos, começam a desenvolver consciência e questionar seu papel na sociedade. O jogador controla três androides cujas histórias se entrelaçam em meio a conflitos sociais e morais, tomando decisões que impactam o destino deles e da humanidade. É uma experiência focada em escolhas, consequências e drama emocional intenso.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'red-dead-redemption-2',
+                title: 'RED DEAD REDEMPTION 2',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2018,
+                publisher: 'ROCKSTAR GAMES',
+                genre: 'AÇÃO/ AVENTURA/ MUNDO ABERTO/ WESTERN (FAROESTE)',
+                coverLink: 'https://m.media-amazon.com/images/I/61Y1Tm30tPL._UF1000%2C1000_QL80_.jpg',
+                description: 'Red Dead Redemption 2 é um jogo de ação e aventura em mundo aberto que conta a história de Arthur Morgan, um fora da lei e membro da gangue Van der Linde, vivendo os últimos dias do Velho Oeste americano. O jogador explora vastas paisagens, realiza missões variadas, enfrenta confrontos intensos e toma decisões que afetam a história e os relacionamentos com outros personagens, tudo em um cenário rico e imersivo.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'resident-evil-2-remake',
+                title: 'RESIDENT EVIL 2 REMAKE',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2019,
+                publisher: 'CAPCOM',
+                genre: 'SURVIVAL/ HORROR/ AÇÃO/ AVENTURA',
+                coverLink: 'https://i5.walmartimages.com/seo/Resident-Evil-2-Remake-PS4-Playstation-4-Completely-reimagined-horror-classic_581fa00c-7889-4cc6-9378-0a3b17129657.266fdd7df0b5056ad3f85a6af9a508d1.jpeg',
+                description: 'Resident Evil 2 Remake é uma reimaginação moderna do clássico jogo de survival horror de 1998. Nele, o jogador controla Leon Kennedy e Claire Redfield, que tentam sobreviver ao surto zumbi em Raccoon City enquanto exploram ambientes assustadores, enfrentam monstros assustadores e desvendam mistérios sombrios. O jogo combina tensão, atmosfera imersiva e ação desafiadora, mantendo a essência do original com gráficos e mecânicas atualizadas.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'resident-evil-3-remake',
+                title: 'RESIDENT EVIL 3 REMAKE',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2020,
+                publisher: 'CAPCOM',
+                genre: 'SURVIVAL/ HORROR/ AÇÃO/ AVENTURA',
+                coverLink: 'https://m.media-amazon.com/images/I/61CWrsUbEML.jpg',
+                description: 'Resident Evil 3 Remake reimagina o clássico survival horror de 1999, colocando o jogador no papel de Jill Valentine, que tenta escapar da cidade de Raccoon City enquanto é perseguida por um implacável monstro chamado Nemesis. O jogo combina ação acelerada, exploração tensa e momentos de suspense, oferecendo gráficos modernos e jogabilidade refinada para entregar uma experiência intensa de terror e sobrevivência.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'dead-rising-4',
+                title: 'DEAD RISING 4: FRANK\'S BIG PACKAGE',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2017,
+                publisher: 'CAPCOM',
+                genre: 'AÇÃO/ SURVIVAL HORROR/ HACK AND SLASH/ BEAT\' EM UP',
+                coverLink: 'https://m.media-amazon.com/images/I/919QvT5kv7L.jpg',
+                description: 'Dead Rising 4: Frank’s Big Package é uma edição especial que inclui o jogo base Dead Rising 4 e todo o conteúdo adicional lançado até o momento. Nele, o jornalista Frank West retorna para enfrentar uma infestação massiva de zumbis em Willamette, usando um arsenal de armas malucas e veículos para sobreviver. O jogo mistura ação intensa, exploração em mundo aberto e humor, oferecendo uma experiência caótica e divertida contra hordas de mortos-vivos.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'god-of-war',
+                title: 'GOD OF WAR',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2018,
+                publisher: 'SANTA MONICA STUDIO',
+                genre: 'AÇÃO/ AVENTURA/ RPG/ HACK AND SLASH',
+                coverLink: 'https://m.media-amazon.com/images/I/711lrrvzt%2BL.jpg',
+                description: 'God of War (2018) acompanha Kratos, o guerreiro espartano, agora vivendo nas terras da mitologia nórdica ao lado do seu filho Atreus. Juntos, eles embarcam em uma jornada épica para cumprir um último desejo da esposa de Kratos. O jogo combina combates brutais, exploração de ambientes ricos e resolução de quebra-cabeças, enquanto desenvolve uma história profunda sobre paternidade, redenção e legado.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'god-of-war-ragnarok',
+                title: 'GOD OF WAR: RAGNAROK',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}, {name: 'PLAYSTATION 5', color: 'platform-ps5'}],
+                year: 2022,
+                publisher: 'SANTA MONICA STUDIO',
+                genre: 'AÇÃO/ AVENTURA/ RPG/ HACK AND SLASH',
+                coverLink: 'https://http2.mlstatic.com/D_NQ_NP_645332-MLU72675264268_112023-O.webp',
+                description: 'Dando continuidade à saga iniciada em 2018, God of War Ragnarök segue Kratos e seu filho Atreus em uma jornada pelos Nove Reinos da mitologia nórdica. Com o iminente Ragnarök — o fim do mundo nórdico —, pai e filho enfrentam deuses, monstros e suas próprias limitações, enquanto buscam respostas sobre o destino que os aguarda.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'far-cry-5',
+                title: 'FAR CRY 5',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2018,
+                publisher: 'UBISOFT',
+                genre: 'FPS/ AÇÃO/ AVENTURA/MUNDO ABERTO',
+                coverLink: 'https://m.media-amazon.com/images/I/91keHwoCTAL._UF1000%2C1000_QL80_.jpg',
+                description: 'Ambientado no fictício condado de Hope County, em Montana, EUA, o jogo coloca o jogador no papel de um delegado de xerife enviado para prender Joseph Seed, líder de um culto apocalíptico chamado "Portão do Éden". A missão dá errado, resultando em um cerco ao condado. O jogador deve então formar uma resistência local para libertar Hope County, enfrentando os seguidores do culto e seus líderes: Jacob, John e Faith Seed.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'far-cry-6',
+                title: 'FAR CRY 6',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}, {name: 'PLAYSTATION 5', color: 'platform-ps5'}],
+                year: 2021,
+                publisher: 'UBISOFT',
+                genre: 'FPS/ AÇÃO/ AVENTURA/MUNDO ABERTO',
+                coverLink: 'https://media.gamestop.com/i/gamestop/11103984/FAR-CRY-6---PlayStation-4?%24pdp%24=',
+                description: 'Ambientado na ilha fictícia de Yara, inspirada em Cuba, Far Cry 6 coloca o jogador no papel de Dani Rojas, um guerrilheiro que se junta ao movimento revolucionário Libertad para derrubar o regime opressor do ditador Antón Castillo, interpretado por Giancarlo Esposito. O jogo apresenta um vasto mundo aberto repleto de missões principais e secundárias, atividades e exploração. Os jogadores podem personalizar armas e veículos, recrutar aliados e utilizar um sistema de combate dinâmico. Uma das novidades da série é a inclusão de um modo em terceira pessoa, permitindo uma perspectiva diferente durante o jogo.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'dying-light-enhanced-edition',
+                title: 'DYING LIGHT: ENHANCED EDITION',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2015,
+                publisher: 'TECHLAND',
+                genre: 'FPS/ PARKOUR/ MUNDO ABERTO',
+                coverLink: 'https://m.media-amazon.com/images/I/81SQRD5FYVL._UF1000%2C1000_QL80_.jpg',
+                description: 'Ambientado na cidade fictícia de Harran, devastada por um surto viral transformando a população em zumbis, o jogador assume o papel de Kyle Crane, um agente infiltrado em uma facção local. Utilizando habilidades de parkour, o protagonista deve explorar o ambiente urbano, coletar recursos, combater inimigos e tomar decisões morais que influenciam o desenrolar da história. Além do jogo base, a Enhanced Edition inclui: Dying Light: The Following: Uma expansão significativa que introduz um novo mapa aberto, veículos personalizáveis e uma nova narrativa. The Bozak Horde: Um modo desafiador com sua própria história secundária. Cuisine & Cargo: Duas zonas de quarentena adicionais. Ultimate Survivor Bundle: Armas e trajes exclusivos. Be the Zombie: Modo multijogador onde o jogador assume o papel de um zumbi.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'dying-light-2',
+                title: 'DYING LIGHT 2',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}, {name: 'PLAYSTATION 5', color: 'platform-ps5'}],
+                year: 2022,
+                publisher: 'TECHLAND',
+                genre: 'FPS/ PARKOUR/ MUNDO ABERTO/ RPG',
+                coverLink: 'https://media.gamestop.com/i/gamestop/10164893/Dying-Light-2-Stay-Human',
+                description: 'Dying Light 2: Stay Human é um jogo de ação e sobrevivência ambientado 22 anos após os eventos do primeiro título. O jogador assume o papel de Aiden Caldwell, um sobrevivente infectado que possui habilidades de parkour aprimoradas. O jogo se passa na cidade de Villedor, um vasto mundo aberto dividido em sete regiões distintas. As escolhas do jogador influenciam diretamente o desenvolvimento da história e as interações com as facções locais, como os Pacificadores e os Superviventes. O combate é focado em armas corpo a corpo, com mecânicas de fadiga e degradação de equipamentos. Além disso, o ciclo dia/noite afeta o comportamento dos infectados, tornando-los mais agressivos à noite.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'middle-earth-shadows-of-war',
+                title: 'MIDDLE-EARTH: SHADOWS OF WAR',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2017,
+                publisher: 'MONOLITH',
+                genre: 'AÇÃO/ RPG/ MUNDO ABERTO',
+                coverLink: 'https://m.media-amazon.com/images/I/71iOL3viCYL._UF894%2C1000_QL80_.jpg',
+                description: 'Middle-earth: Shadow of War é um jogo de ação e aventura ambientado no universo da Terra-média, entre os eventos de "O Hobbit" e "O Senhor dos Anéis". O jogador assume o papel de Talion, um ranger de Gondor, que se une ao espírito do ferreiro élfico Celebrimbor para forjar um novo Anel de Poder. Juntos, eles buscam enfrentar Sauron e seu exército de orcs para impedir a conquista da Terra-média. A jogabilidade combina combate dinâmico, exploração em mundo aberto e o inovador Sistema Nêmesis, que cria histórias únicas com inimigos e seguidores baseadas nas interações do jogador.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'injustice-2',
+                title: 'INJUSTICE 2',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2017,
+                publisher: 'NETHERREALM',
+                genre: 'LUTA',
+                coverLink: 'https://m.media-amazon.com/images/I/71ndy8pwHQL._UF1000,1000_QL80_.jpg',
+                description: 'Injustice 2 é um jogo de luta desenvolvido pela NetherRealm Studios e publicado pela Warner Bros. Games. É a sequência de Injustice: Gods Among Us (2013) e apresenta uma narrativa cinematográfica que continua a história do Regime do Superman. O jogo permite aos jogadores controlar heróis e vilões do universo DC Comics em combates intensos, utilizando um sistema de combate aprimorado e mecânicas de personalização de personagens. Os jogadores podem ganhar equipamentos durante as batalhas, permitindo personalizar as habilidades e aparências de seus lutadores.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'assassins-creed-origins',
+                title: 'ASSASSIN\'S CREED: ORIGINS',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2017,
+                publisher: 'UBISOFT',
+                genre: 'RPG DE AÇÃO/ AVENTURA/ MUNDO ABERTO',
+                coverLink: 'https://m.media-amazon.com/images/I/81MztoQMa8L.jpg',
+                description: 'Ambientado no Egito Ptolemaico (cerca de 49–47 a.C.), o jogador assume o papel de Bayek, um Medjay em busca de justiça após a perda de seu filho. A narrativa explora as origens da Irmandade dos Assassinos e seu conflito com a Ordem dos Anciãos. O mundo é vasto e repleto de pirâmides, tumbas e cidades antigas, com exploração livre, combates dinâmicos e uma forte pegada de RPG.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'marvel-spider-man',
+                title: 'MARVEL: SPIDER-MAN',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2018,
+                publisher: 'INSOMNIAC',
+                genre: 'AÇÃO/ AVENTURA/ MUNDO ABERTO',
+                coverLink: 'https://cdn.awsli.com.br/800x800/53/53761/produto/29815822/4677d91514.jpg',
+                description: 'Em Marvel’s Spider‑Man, você controla um Peter Parker mais experiente – já com oito anos de carreira como super‑herói – enfrentando o vilão Mister Negative e sua ameaça de vírus que pode destruir Nova York. O jogo combina uma história envolvente com combate dinâmico, mecânicas de aranha ágeis, múltiplas missões e cenários vibrantes que recriam Nova York com impressionante fidelidade.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'fifa-18',
+                title: 'FIFA 18',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2017,
+                publisher: 'EA SPORTS',
+                genre: 'SIMULADOR/ FUTEBOL',
+                coverLink: 'https://m.media-amazon.com/images/I/81eh7lYFIUL.jpg',
+                description: 'FIFA 18 é uma simulação de futebol desenvolvida pela EA Vancouver e EA Romania, usando o motor Frostbite nas versões modernas (PS4, Xbox One, PC). O destaque deste título inclui: The Journey: Hunter Returns – modo história que segue o jogador Alex Hunter, com versões para inglês e pela primeira vez feminina (Kim Hunter). Real Player Motion Technology – animações mais realistas e responsivas Modos clássicos como Carreira, Ultimate Team (com introdução dos Ícones), Temporadas Online e Kick Off. O jogo se destacou por seu gameplay fluido, narradores em português (Leifert e Caio Ribeiro no Brasil) e pela inclusão do torneio da Copa do Mundo como pacote pós-lançamento.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'the-last-of-us-part-ii',
+                title: 'THE LAST OF US PART II',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2020,
+                publisher: 'NAUGHTY DOG',
+                genre: 'AÇÃO/ AVENTURA/ SURVIVAL',
+                coverLink: 'https://cdn.mobygames.com/covers/9803854-the-last-of-us-part-ii-playstation-4-front-cover.jpg',
+                description: 'Ambientado cinco anos após os eventos do primeiro jogo, você acompanha Ellie e Joel vivendo em uma comunidade de sobreviventes em Jackson, Wyoming. Quando um evento violento abala essa paz, Ellie inicia uma jornada implacável em busca de vingança. O game explora temas como moral, ciclo de violência e consequências emocionais, oferecendo combate intenso, furtividade, crafting e interação com infectados e humanos hostis.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'call-of-duty-infinity-warfare',
+                title: 'CALL OF DUTY: INFINITY WARFARE',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2016,
+                publisher: 'ACTIVISION',
+                genre: 'FPS/ FICÇÃO CIENTIFICA',
+                coverLink: 'https://m.media-amazon.com/images/I/71mYdwcH2EL.jpg',
+                description: 'Situado no final do século XXI, o jogador assume o papel do Capitão Nick Reyes, líder da SCAR a bordo do destruidor espacial Retribution, na guerra contra a facção inimiga Settlement Defense Front, que ameaça a Terra e a colonização do sistema solar. A campanha mescla combates em gravidade zero, tiroteios convencionais e trechos com combate aéreo e naves.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            },
+            {
+                id: 'ghost-of-tsushima',
+                title: 'GHOST OF TSUSHIMA',
+                platforms: [{name: 'PLAYSTATION 4', color: 'platform-ps4'}],
+                year: 2020,
+                publisher: 'SUCKER PUNCH',
+                genre: 'AÇÃO/ AVENTURA/ MUNDO ABERTO',
+                coverLink: 'https://m.media-amazon.com/images/I/61GTZnzeZgL.jpg',
+                description: 'Você controla Jin Sakai, um samurai que luta para defender sua ilha natal durante a invasão mongol de 1274. Conforme a história avança, ele enfrenta o dilema entre honrar o código samurai ou adotar táticas furtivas — tornando-se o lendário “Fantasma” de Tsushima. O jogo entrega um vasto mundo aberto repleto de combates dinâmicos com katana, exploração a cavalo, stealth refinado e narrativas emocionais.',
+                media: { isPhysical: true, isDigital: false },
+                status: {
+                    inCollection: true,
+                    isBorrowed: false,
+                    borrowedBy: ''
+                }
+            }
+        ];
+
+        let currentGameIdInModal = null; // Variável para armazenar o ID do jogo atualmente no modal
+
+        /**
+         * Manipula a navegação entre os jogos no modal usando as teclas de seta.
+         * @param {KeyboardEvent} event O evento de teclado.
+         */
+        function handleArrowKeyNavigation(event) {
+            // Usa currentGameIdInModal para verificar qual jogo está aberto no modal
+            if (!currentGameIdInModal) return; 
+
+            const currentIndex = games.findIndex(game => game.id === currentGameIdInModal);
+            let nextIndex = -1;
+
+            if (event.key === 'ArrowLeft') {
+                nextIndex = (currentIndex - 1 + games.length) % games.length; // Ciclo para o jogo anterior
+            } else if (event.key === 'ArrowRight') {
+                nextIndex = (currentIndex + 1) % games.length; // Ciclo para o próximo jogo
+            }
+
+            if (nextIndex !== -1) {
+                openGameModal(games[nextIndex]); // Abre o modal com o próximo/anterior jogo
+            }
+        }
+
+        /**
+         * Renderiza os cartões de jogos dinamicamente no contêiner principal.
+         */
+        function renderGameCards() {
+            const container = document.getElementById('game-cards-container');
+            container.innerHTML = ''; // Limpa os cards existentes
+
+            // Ordena os jogos em ordem alfabética pelo título
+            const sortedGames = [...games].sort((a, b) => a.title.localeCompare(b.title));
+
+            sortedGames.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-800 rounded-lg shadow-xl overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer';
+                // Adiciona um evento de clique para abrir o modal com os detalhes do jogo
+                card.onclick = () => openGameModal(game);
+
+                // Constrói o HTML para as plataformas, aplicando as cores corretas
+                const platformsHtml = game.platforms.map(p => `<span class="${p.color}">${p.name}</span>`).join(' / ');
+
+                // Define o status da coleção/empréstimo para a miniatura
+                let collectionStatusHtml = '';
+                if (game.status.inCollection) {
+                    collectionStatusHtml = `<span class="em-colecao">EM COLEÇÃO</span>`;
+                } else if (game.status.isBorrowed) {
+                    collectionStatusHtml = `<span class="em-emprestado-thumbnail">EMPRESTADO</span>`;
+                    // Adiciona o nome do tomador se o jogo estiver emprestado e o nome estiver preenchido
+                    if (game.status.borrowedBy) {
+                        collectionStatusHtml += `<br/><span class="text-gray-400 text-xs font-bold">PARA: ${game.status.borrowedBy}</span>`;
+                    }
+                }
+
+                // Define o tipo de mídia para a miniatura
+                let mediaTypeHtml = '';
+                if (game.media.isPhysical) {
+                    mediaTypeHtml = `<span class="media-fisica-text">FÍSICA</span>`;
+                } else if (game.media.isDigital) {
+                    mediaTypeHtml = `<span class="media-digital-text">DIGITAL</span>`;
+                }
+
+
+                // Define o conteúdo interno do cartão
+                card.innerHTML = `
+                    <img src="${game.coverLink}" alt="Capa de ${game.title}" class="w-full h-72 object-cover rounded-t-lg">
+                    <div class="p-6">
+                        <h2 class="text-3xl font-bold mb-2 text-white">${game.title}</h2>
+                        <div class="text-gray-400 text-sm mb-4 flex flex-wrap gap-2">
+                            <p><span class="font-bold">PLATAFORMA(S)</span>: ${platformsHtml}</p>
+                            <p><span class="font-bold">ANO</span>: ${game.year}</p>
+                            <p><span class="font-bold">PUBLISHER</span>: ${game.publisher}</p>
+                            <p><span class="font-bold">GÊNERO</span>: ${game.genre}</p>
+                        </div>
+                        <!-- A descrição do jogo foi removida daqui para ser visível apenas no modal -->
+                        <!-- Informações de status e mídia na miniatura -->
+                        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs mt-4">
+                            ${collectionStatusHtml ? `<p>${collectionStatusHtml}</p>` : ''}
+                            ${mediaTypeHtml ? `<p><span class="font-bold">MÍDIA</span>: ${mediaTypeHtml}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card); // Adiciona o cartão ao contêiner
+            });
+        }
+
+        /**
+         * Abre o modal de detalhes do jogo, preenchendo-o com os dados do jogo selecionado.
+         * @param {object} game O objeto do jogo contendo todos os seus detalhes.
+         */
+        function openGameModal(game) {
+            currentGameIdInModal = game.id; // Define o ID do jogo atual para manipulação futura
+
+            // Referências aos elementos do modal
+            const modalGameCover = document.getElementById('modalGameCover');
+            const modalGameTitle = document.getElementById('modalGameTitle');
+            const modalGamePlatforms = document.getElementById('modalGamePlatforms');
+            const modalGameYear = document.getElementById('modalGameYear');
+            const modalGamePublisher = document.getElementById('modalGamePublisher');
+            const modalGameGenre = document.getElementById('modalGameGenre');
+            const modalGameDescription = document.getElementById('modalGameDescription');
+            const modalInCollectionCheckbox = document.getElementById('modalInCollectionCheckbox');
+            const modalPhysicalMediaCheckbox = document.getElementById('modalPhysicalMediaCheckbox'); // Nova referência
+            const modalDigitalMediaCheckbox = document.getElementById('modalDigitalMediaCheckbox'); // Nova referência
+            const borrowedOptions = document.getElementById('borrowedOptions');
+            const modalBorrowedCheckbox = document.getElementById('modalBorrowedCheckbox');
+            const borrowerInputContainer = document.getElementById('borrowerInputContainer');
+            const modalBorrowerNameInput = document.getElementById('modalBorrowerNameInput');
+            const gameModal = document.getElementById('gameModal');
+
+            // Preenche os elementos do modal com as informações do jogo
+            modalGameCover.src = game.coverLink;
+            modalGameCover.alt = `Capa de ${game.title}`;
+            modalGameTitle.textContent = game.title;
+            modalGameYear.textContent = game.year;
+            modalGamePublisher.textContent = game.publisher;
+            modalGameGenre.textContent = game.genre;
+            modalGameDescription.textContent = game.description; // A descrição é preenchida aqui
+
+            // Preenche as plataformas com as cores corretas
+            modalGamePlatforms.innerHTML = game.platforms.map(p => `<span class="${p.color}">${p.name}</span>`).join(' / ');
+
+            // Atualiza o estado dos checkboxes de Mídia
+            modalPhysicalMediaCheckbox.checked = game.media.isPhysical;
+            modalDigitalMediaCheckbox.checked = game.media.isDigital;
+
+            // Atualiza o estado dos checkboxes de Coleção e Empréstimo e campos de texto
+            modalInCollectionCheckbox.checked = game.status.inCollection;
+            modalBorrowedCheckbox.checked = game.status.isBorrowed;
+            modalBorrowerNameInput.value = game.status.borrowedBy;
+
+            // Define os ouvintes de evento (garante que sejam definidos apenas uma vez por abertura de modal)
+            modalInCollectionCheckbox.onchange = handleInCollectionChange;
+            modalPhysicalMediaCheckbox.onchange = handlePhysicalMediaChange; // Novo listener
+            modalDigitalMediaCheckbox.onchange = handleDigitalMediaChange;   // Novo listener
+            modalBorrowedCheckbox.onchange = handleBorrowedChange;
+            modalBorrowerNameInput.oninput = handleBorrowerNameInput;
+
+            // Adiciona o ouvinte de evento para a tecla Enter no campo de nome do tomador
+            modalBorrowerNameInput.onkeydown = (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Impede a quebra de linha padrão do Enter
+                    confirmBorrowerNameAndCloseModal();
+                }
+            };
+
+            // Adiciona o ouvinte de clique para fechar o modal ao clicar no overlay
+            gameModal.onclick = (event) => {
+                // Se o clique ocorreu no próprio modal (background) e não no conteúdo dele
+                if (event.target === gameModal) {
+                    closeGameModal();
+                }
+            };
+
+            // Adiciona o ouvinte de evento de teclado para navegação com setas
+            document.addEventListener('keydown', handleArrowKeyNavigation);
+
+            // Chama as funções de manipulação para definir o estado inicial correto da UI
+            handleInCollectionChange(); // Este chamará handleBorrowedChange internamente se necessário
+
+            // Remove a classe 'hidden' para tornar o modal visível
+            gameModal.classList.remove('hidden');
+        }
+
+        /**
+         * Manipula a mudança no checkbox 'EM COLEÇÃO'.
+         * Mostra/esconde as opções de empréstimo.
+         */
+        function handleInCollectionChange() {
+            const modalInCollectionCheckbox = document.getElementById('modalInCollectionCheckbox');
+            const borrowedOptions = document.getElementById('borrowedOptions');
+            // Usa currentGameIdInModal para encontrar o objeto de jogo correto
+            const currentGameObject = games.find(game => game.id === currentGameIdInModal);
+
+            if (currentGameObject) { // Garante que o objeto exista antes de modificar
+                currentGameObject.status.inCollection = modalInCollectionCheckbox.checked;
+
+                if (modalInCollectionCheckbox.checked) {
+                    // Se 'EM COLEÇÃO' estiver marcado, esconde as opções de empréstimo
+                    borrowedOptions.classList.add('hidden');
+                    // Desmarca EMPRESTADO e limpa nome do tomador
+                    document.getElementById('modalBorrowedCheckbox').checked = false;
+                    document.getElementById('modalBorrowerNameInput').value = '';
+                    document.getElementById('borrowerInputContainer').classList.add('hidden');
+
+                    currentGameObject.status.isBorrowed = false;
+                    currentGameObject.status.borrowedBy = '';
+                } else {
+                    // Se 'EM COLEÇÃO' estiver desmarcado, mostra as opções de empréstimo
+                    borrowedOptions.classList.remove('hidden');
+                    // Chama handleBorrowedChange para garantir o estado correto do input do tomador
+                    handleBorrowedChange(); // Re-avalia o estado de emprestado
+                }
+                // Não salva no Firestore: saveGameToFirestore(currentGameObject);
+                renderGameCards(); // Atualiza os cards da miniatura para refletir as mudanças
+            }
+        }
+
+        /**
+         * Manipula a mudança no checkbox 'FÍSICA'.
+         * Garante que apenas uma opção de mídia esteja selecionada por vez.
+         */
+        function handlePhysicalMediaChange() {
+            const modalPhysicalMediaCheckbox = document.getElementById('modalPhysicalMediaCheckbox');
+            const modalDigitalMediaCheckbox = document.getElementById('modalDigitalMediaCheckbox');
+            // Usa currentGameIdInModal para encontrar o objeto de jogo correto
+            const currentGameObject = games.find(game => game.id === currentGameIdInModal);
+
+            if (currentGameObject) {
+                if (modalPhysicalMediaCheckbox.checked) {
+                    modalDigitalMediaCheckbox.checked = false; // Desmarca Digital se Física for marcada
+                    currentGameObject.media.isPhysical = true;
+                    currentGameObject.media.isDigital = false;
+                } else {
+                    // Se Física for desmarcada e Digital não estiver marcada, pode-se decidir um padrão.
+                    // Por enquanto, apenas atualiza o estado.
+                    currentGameObject.media.isPhysical = false;
+                }
+                // Não salva no Firestore: saveGameToFirestore(currentGameObject);
+                renderGameCards(); // Atualiza os cards da miniatura para refletir as mudanças
+            }
+        }
+
+        /**
+         * Manipula a mudança no checkbox 'DIGITAL'.
+         * Garante que apenas uma opção de mídia esteja selecionada por vez.
+         */
+        function handleDigitalMediaChange() {
+            const modalPhysicalMediaCheckbox = document.getElementById('modalPhysicalMediaCheckbox');
+            const modalDigitalMediaCheckbox = document.getElementById('modalDigitalMediaCheckbox');
+            // Usa currentGameIdInModal para encontrar o objeto de jogo correto
+            const currentGameObject = games.find(game => game.id === currentGameIdInModal);
+
+            if (currentGameObject) {
+                if (modalDigitalMediaCheckbox.checked) {
+                    modalPhysicalMediaCheckbox.checked = false; // Desmarca Física se Digital for marcada
+                    currentGameObject.media.isDigital = true;
+                    currentGameObject.media.isPhysical = false;
+                } else {
+                    // Se Digital for desmarcada e Física não estiver marcada, pode-se decidir um padrão.
+                    // Por enquanto, apenas atualiza o estado.
+                    currentGameObject.media.isDigital = false;
+                }
+                // Não salva no Firestore: saveGameToFirestore(currentGameObject);
+                renderGameCards(); // Atualiza os cards da miniatura para refletir as mudanças
+            }
+        }
+
+        /**
+         * Manipula a mudança no checkbox 'EMPRESTADO'.
+         * Mostra/esconde a caixa de texto para o nome do tomador.
+         */
+        function handleBorrowedChange() {
+            const modalBorrowedCheckbox = document.getElementById('modalBorrowedCheckbox');
+            const borrowerInputContainer = document.getElementById('borrowerInputContainer');
+            // Usa currentGameIdInModal para encontrar o objeto de jogo correto
+            const currentGameObject = games.find(game => game.id === currentGameIdInModal);
+
+            if (currentGameObject) {
+                currentGameObject.status.isBorrowed = modalBorrowedCheckbox.checked;
+
+                if (modalBorrowedCheckbox.checked) {
+                    // Se 'EMPRESTADO' estiver marcado, mostra a caixa de texto
+                    borrowerInputContainer.classList.remove('hidden');
+                } else {
+                    // Se 'EMPRESTADO' estiver desmarcado, esconde a caixa de texto e limpa o nome
+                    borrowerInputContainer.classList.add('hidden');
+                    document.getElementById('modalBorrowerNameInput').value = '';
+                    currentGameObject.status.borrowedBy = '';
+                }
+                // Não salva no Firestore: saveGameToFirestore(currentGameObject);
+                renderGameCards(); // Atualiza os cards da miniatura para refletir as mudanças
+            }
+        }
+
+        /**
+         * Captura o nome do tomador e atualiza no objeto do jogo.
+         */
+        function handleBorrowerNameInput() {
+            const modalBorrowerNameInput = document.getElementById('modalBorrowerNameInput');
+            // Usa currentGameIdInModal para encontrar o objeto de jogo correto
+            const currentGameObject = games.find(game => game.id === currentGameIdInModal);
+            if (currentGameObject) {
+                currentGameObject.status.borrowedBy = modalBorrowerNameInput.value;
+            }
+        }
+
+        /**
+         * Confirma o nome do tomador e fecha o modal, atualizando os cards.
+         */
+        function confirmBorrowerNameAndCloseModal() {
+            const modalBorrowerNameInput = document.getElementById('modalBorrowerNameInput');
+            // Usa currentGameIdInModal para encontrar o objeto de jogo correto
+            const currentGameObject = games.find(game => game.id === currentGameIdInModal);
+
+            if (currentGameObject) {
+                currentGameObject.status.borrowedBy = modalBorrowerNameInput.value; // Garante que o nome final seja salvo
+                // Não salva no Firestore: saveGameToFirestore(currentGameObject);
+            }
+            renderGameCards(); // Atualiza os cards da miniatura para refletir as mudanças
+            closeGameModal(); // Fecha o modal
+        }
+
+        /**
+         * Fecha o modal de detalhes do jogo.
+         */
+        function closeGameModal() {
+            // Remove o ouvinte de evento keydown para a navegação com setas
+            document.removeEventListener('keydown', handleArrowKeyNavigation);
+
+            // Remove o ouvinte de evento keydown para o campo de nome do tomador
+            const modalBorrowerNameInput = document.getElementById('modalBorrowerNameInput');
+            if (modalBorrowerNameInput) {
+                modalBorrowerNameInput.onkeydown = null;
+            }
+
+            // Remove o ouvinte de clique do overlay ao fechar o modal para evitar múltiplos ouvintes
+            const gameModal = document.getElementById('gameModal');
+            if (gameModal) {
+                gameModal.onclick = null; // Remove o ouvinte de clique do overlay
+            }
+
+            document.getElementById('gameModal').classList.add('hidden');
+            currentGameIdInModal = null; // Limpa o ID do jogo atual no modal
+        }
+
+        // Garante que os cartões sejam renderizados assim que a página é carregada
+        window.onload = renderGameCards;
+    </script>
+</body>
+</html>
+
