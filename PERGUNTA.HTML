@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quem é o Rei do Pedaço?</title>
+    <!-- Inclui Tailwind CSS para estilização fácil e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define a fonte Inter como padrão para a página */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilos para o spinner de carregamento (não usado diretamente neste app, mas útil para futuras expansões) */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6; /* Cor do spinner */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-purple-200 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center transform transition-all duration-300 hover:scale-105">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-6 leading-tight">
+            Quem é o Rei do Pedaço?
+        </h1>
+        <input
+            type="text"
+            id="answerInput"
+            placeholder="Digite sua resposta aqui..."
+            class="w-full p-4 mb-6 text-lg border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+            onkeydown="if(event.key === 'Enter') checkAnswer()"
+        />
+        <button
+            onclick="checkAnswer()"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50"
+        >
+            Verificar Resposta
+        </button>
+
+        <div id="resultDisplay" class="mt-8 text-xl font-semibold">
+            <!-- O resultado da verificação será exibido aqui -->
+        </div>
+    </div>
+
+    <script>
+        // Função para verificar a resposta do usuário
+        function checkAnswer() {
+            const answerInput = document.getElementById('answerInput');
+            const resultDisplay = document.getElementById('resultDisplay');
+            const userAnswer = answerInput.value.trim().toUpperCase(); // Pega a resposta, remove espaços e converte para maiúsculas
+            const correctAnswer = 'MARCELÃO DA REGULAGEM'; // A resposta correta
+
+            // Limpa qualquer estilo ou texto anterior do resultado
+            resultDisplay.className = 'mt-8 text-xl font-semibold';
+            resultDisplay.textContent = '';
+
+            if (userAnswer === correctAnswer) {
+                // Se a resposta estiver correta
+                resultDisplay.classList.add('text-green-600'); // Adiciona cor verde
+                resultDisplay.textContent = '👑 Parabéns! Você acertou! MARCELÃO DA REGULAGEM é o Rei do Pedaço! 👑';
+            } else {
+                // Se a resposta estiver incorreta, seleciona uma "tirada de onda" aleatória
+                const taunts = [
+                    '😅 Errou feio, errou rude! Não foi dessa vez!',
+                    '🤔 Hmm, essa resposta não tem a Regulagem certa...',
+                    '😂 Quase lá... mas não! Tente de novo!',
+                    '🤦‍♂️ Ops! Parece que você não conhece o verdadeiro Rei!',
+                    '😎 Essa foi por pouco (só que não)!',
+                    '😜 Você precisa de mais aulas de Regulagem!',
+                    '🙈 A resposta estava na ponta da língua (ou não)!'
+                ];
+                const randomTaunt = taunts[Math.floor(Math.random() * taunts.length)];
+                resultDisplay.classList.add('text-red-600'); // Adiciona cor vermelha
+                resultDisplay.textContent = `❌ Resposta incorreta! ${randomTaunt}`;
+            }
+
+            answerInput.value = ''; // Limpa o campo de entrada após a verificação
+        }
+    </script>
+</body>
+</html>
